@@ -2,9 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDbConnection } from "@/lib/db/sqlite";
 import { getCurrentUserId } from "@/lib/auth/server-cookies";
 
+interface SharedPromptRow {
+  id: string;
+  title: string;
+  content: string;
+  description: string;
+  share_description: string;
+  rating: number;
+  like_count: number;
+  share_count: number;
+  shared_at: string;
+  user_id: string;
+  category_name: string;
+  author_name: string;
+  is_liked: number;
+  is_favorited: number;
+}
+
+interface TagRow {
+  name: string;
+}
+
 export async function GET(request: NextRequest) {
   try {
-    const currentUserId = getCurrentUserId();
+    const currentUserId = await getCurrentUserId();
     if (!currentUserId) {
       return NextResponse.json({ error: "未授权" }, { status: 401 });
     }
@@ -51,7 +72,7 @@ export async function GET(request: NextRequest) {
 
     // 查询共享提示词
     const query = `
-      SELECT 
+      SELECT
         p.id,
         p.title,
         p.content,
@@ -63,7 +84,7 @@ export async function GET(request: NextRequest) {
         p.shared_at,
         p.user_id,
         c.name as category_name,
-        CASE 
+        CASE
           WHEN p.user_id = '1' THEN '系统管理员'
           WHEN p.user_id = '2' THEN '普通用户'
           ELSE '用户' || p.user_id
@@ -79,21 +100,21 @@ export async function GET(request: NextRequest) {
       LIMIT 50
     `;
 
-    const sharedPrompts = db.prepare(query).all(currentUserId, currentUserId, ...params);
+    const sharedPrompts = db.prepare(query).all(currentUserId, currentUserId, ...params) as SharedPromptRow[];
 
     // 获取每个提示词的标签
     const promptsWithTags = await Promise.all(
-      sharedPrompts.map(async (prompt: any) => {
+      sharedPrompts.map(async (prompt) => {
         const tags = db.prepare(`
-          SELECT t.name 
+          SELECT t.name
           FROM tags t
           JOIN prompt_tags pt ON t.id = pt.tag_id
           WHERE pt.prompt_id = ?
-        `).all(prompt.id);
+        `).all(prompt.id) as TagRow[];
 
         return {
           ...prompt,
-          tags: tags.map((tag: any) => tag.name),
+          tags: tags.map((tag) => tag.name),
         };
       })
     );
@@ -106,4 +127,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
