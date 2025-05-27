@@ -5,10 +5,10 @@ import { KnowledgeBase } from '@/types';
 // GET - 获取单个知识库条目
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const db = await getDbConnection();
 
     const knowledgeItem = db.prepare(
@@ -35,10 +35,10 @@ export async function GET(
 // PUT - 更新知识库条目
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { title, content, type, description, tags } = body;
 
@@ -97,10 +97,10 @@ export async function PUT(
 // DELETE - 删除知识库条目
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const db = await getDbConnection();
 
     // 检查条目是否存在
