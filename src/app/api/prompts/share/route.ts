@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDbConnection } from "@/lib/db/sqlite";
 import { requireAuth } from "@/lib/auth/server-cookies";
 
+interface PromptRow {
+  id: string;
+  title: string;
+  is_shared: number;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const userId = await requireAuth();
@@ -26,10 +32,10 @@ export async function POST(request: NextRequest) {
     // 检查用户是否拥有这些提示词
     const placeholders = promptIds.map(() => '?').join(',');
     const ownedPrompts = db.prepare(`
-      SELECT id, title, is_shared 
-      FROM prompts 
+      SELECT id, title, is_shared
+      FROM prompts
       WHERE id IN (${placeholders}) AND user_id = ?
-    `).all(...promptIds, userId);
+    `).all(...promptIds, userId) as PromptRow[];
 
     if (ownedPrompts.length !== promptIds.length) {
       return NextResponse.json(
@@ -39,8 +45,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 过滤出未共享的提示词
-    const unsharedPrompts = ownedPrompts.filter((prompt: { id: string; title: string; is_shared: boolean }) => !prompt.is_shared);
-    
+    const unsharedPrompts = ownedPrompts.filter((prompt) => !prompt.is_shared);
+
     if (unsharedPrompts.length === 0) {
       return NextResponse.json(
         { error: "选中的提示词已全部共享" },
@@ -50,9 +56,9 @@ export async function POST(request: NextRequest) {
 
     // 批量更新提示词为共享状态
     const updatePrompt = db.prepare(`
-      UPDATE prompts 
-      SET is_shared = 1, 
-          shared_at = CURRENT_TIMESTAMP, 
+      UPDATE prompts
+      SET is_shared = 1,
+          shared_at = CURRENT_TIMESTAMP,
           share_description = ?,
           share_count = 0,
           like_count = 0
@@ -81,4 +87,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

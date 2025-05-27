@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDbConnection } from "@/lib/db/sqlite";
 
+interface PromptRow {
+  id: string;
+  rating: number;
+}
+
 // 提交评分
 export async function POST(
   request: NextRequest,
@@ -20,9 +25,9 @@ export async function POST(
     }
 
     const db = await getDbConnection();
-    
+
     // 检查提示词是否存在
-    const prompt = await db.prepare('SELECT * FROM prompts WHERE id = ?').get(params.id);
+    const prompt = await db.prepare('SELECT * FROM prompts WHERE id = ?').get(params.id) as PromptRow | undefined;
     if (!prompt) {
       return NextResponse.json(
         { error: '提示词不存在' },
@@ -33,17 +38,17 @@ export async function POST(
     // 更新提示词评分
     // 这里简化处理，直接更新评分。实际项目中可能需要记录每个用户的评分
     await db.prepare(`
-      UPDATE prompts 
+      UPDATE prompts
       SET rating = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `).run(rating, params.id);
 
     // 获取更新后的提示词
-    const updatedPrompt = await db.prepare('SELECT * FROM prompts WHERE id = ?').get(params.id);
+    const updatedPrompt = await db.prepare('SELECT * FROM prompts WHERE id = ?').get(params.id) as PromptRow | undefined;
 
     return NextResponse.json({
       message: '评分提交成功',
-      rating: updatedPrompt.rating
+      rating: updatedPrompt?.rating
     });
   } catch (error) {
     console.error('提交评分失败:', error);
@@ -62,10 +67,10 @@ export async function GET(
   try {
     const params = await context.params;
     const db = await getDbConnection();
-    
+
     // 获取提示词评分
-    const prompt = await db.prepare('SELECT rating FROM prompts WHERE id = ?').get(params.id);
-    
+    const prompt = await db.prepare('SELECT rating FROM prompts WHERE id = ?').get(params.id) as PromptRow | undefined;
+
     if (!prompt) {
       return NextResponse.json(
         { error: '提示词不存在' },
@@ -84,4 +89,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}

@@ -43,13 +43,13 @@ export function MarkdownEditor({ value, onChange, variables = [] }: MarkdownEdit
   // 替换变量的预览内容
   const previewContent = useMemo(() => {
     let content = value;
-    
+
     // 替换所有变量 {{variableName}} 为实际值
     Object.entries(variableValues).forEach(([name, val]) => {
       const regex = new RegExp(`\\{\\{\\s*${name}\\s*\\}\\}`, 'g');
       content = content.replace(regex, val || `{{${name}}}`);
     });
-    
+
     return content;
   }, [value, variableValues]);
 
@@ -133,7 +133,7 @@ export function MarkdownEditor({ value, onChange, variables = [] }: MarkdownEdit
           onChange={(val) => onChange(val || '')}
           preview={previewMode}
           hideToolbar={false}
-          visibleDragBar={false}
+          visibleDragbar={false}
           textareaProps={{
             placeholder: '在这里输入您的提示词内容...\n\n您可以使用Markdown格式，并通过 {{变量名}} 的方式插入变量。\n\n例如：\n# {{标题}}\n\n您好，{{用户名}}！\n\n这是一个关于 {{主题}} 的提示词。',
             style: {
@@ -143,7 +143,7 @@ export function MarkdownEditor({ value, onChange, variables = [] }: MarkdownEdit
             },
           }}
           height={400}
-          data-color-mode="auto"
+          data-color-mode="light"
         />
       </div>
 
@@ -169,7 +169,7 @@ export function MarkdownEditor({ value, onChange, variables = [] }: MarkdownEdit
                       </span>
                     )}
                   </label>
-                  
+
                   {variable.type === 'select' && variable.options ? (
                     <select
                       value={variableValues[variable.name] || ''}
@@ -208,7 +208,7 @@ export function MarkdownEditor({ value, onChange, variables = [] }: MarkdownEdit
             <div className="space-y-2">
               <label className="text-sm font-medium">预览结果</label>
               <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border">
-                <div 
+                <div
                   className="prose dark:prose-invert max-w-none"
                   dangerouslySetInnerHTML={{
                     __html: previewContent.replace(/\n/g, '<br>')
@@ -232,7 +232,7 @@ export function MarkdownEditor({ value, onChange, variables = [] }: MarkdownEdit
             <div className="text-sm text-blue-800 dark:text-blue-200">
               <p className="font-medium mb-1">编辑提示</p>
               <ul className="space-y-1 text-blue-700 dark:text-blue-300">
-                <li>• 使用 <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">{{变量名}}</code> 格式插入变量</li>
+                <li>• 使用 <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">{'{{变量名}}'}</code> 格式插入变量</li>
                 <li>• 支持完整的Markdown语法，包括标题、列表、代码块等</li>
                 <li>• 可以在变量系统选项卡中定义和管理变量</li>
                 <li>• 实时预览会显示变量替换后的效果</li>
@@ -243,4 +243,4 @@ export function MarkdownEditor({ value, onChange, variables = [] }: MarkdownEdit
       </Card>
     </div>
   );
-} 
+}

@@ -3,6 +3,10 @@ import { getUserInfoServer } from '@/lib/auth/server-cookies';
 import fs from 'fs/promises';
 import path from 'path';
 
+interface User {
+  id: string;
+}
+
 const usersDataPath = path.join(process.cwd(), 'data', 'users.json');
 
 // 初始化用户数据文件
@@ -35,7 +39,7 @@ async function initUsersData() {
         updatedAt: new Date().toISOString(),
       }
     };
-    
+
     await fs.mkdir(path.dirname(usersDataPath), { recursive: true });
     await fs.writeFile(usersDataPath, JSON.stringify(defaultUsers, null, 2));
   }
@@ -44,7 +48,7 @@ async function initUsersData() {
 // 获取用户资料
 export async function GET() {
   try {
-    const user = await getUserInfoServer();
+    const user = await getUserInfoServer<User>();
     if (!user) {
       return NextResponse.json({ error: '未登录' }, { status: 401 });
     }
@@ -73,7 +77,7 @@ export async function GET() {
 // 更新用户资料
 export async function PUT(request: NextRequest) {
   try {
-    const user = await getUserInfoServer();
+    const user = await getUserInfoServer<User>();
     if (!user) {
       return NextResponse.json({ error: '未登录' }, { status: 401 });
     }
@@ -82,7 +86,7 @@ export async function PUT(request: NextRequest) {
 
     await initUsersData();
     const usersData = JSON.parse(await fs.readFile(usersDataPath, 'utf-8'));
-    
+
     if (!usersData[user.id]) {
       return NextResponse.json({ error: '用户不存在' }, { status: 404 });
     }
@@ -99,12 +103,12 @@ export async function PUT(request: NextRequest) {
 
     await fs.writeFile(usersDataPath, JSON.stringify(usersData, null, 2));
 
-    return NextResponse.json({ 
-      success: true, 
-      message: '用户资料更新成功' 
+    return NextResponse.json({
+      success: true,
+      message: '用户资料更新成功'
     });
   } catch (error) {
     console.error('更新用户资料失败:', error);
     return NextResponse.json({ error: '更新用户资料失败' }, { status: 500 });
   }
-} 
+}

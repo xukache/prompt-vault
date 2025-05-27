@@ -1,6 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDbConnection } from '@/lib/db/sqlite';
 
+interface VersionRow {
+  id: string;
+  prompt_id: string;
+  version_number: number;
+  user_version: string;
+  version: string;
+  title: string;
+  content: string;
+  change_description: string;
+  created_at: string;
+}
+
+interface PromptRow {
+  id: string;
+  title: string;
+  content: string;
+  description: string;
+  category_id: string;
+  rating: number;
+  is_favorite: number;
+  version: string;
+  instructions: string;
+  notes: string;
+  variables: string;
+}
+
 // POST /api/prompts/[id]/revert - 回滚到指定版本
 export async function POST(
   request: NextRequest,
@@ -22,7 +48,7 @@ export async function POST(
 
     // 获取要回滚到的版本
     const targetVersion = db.prepare(`
-      SELECT 
+      SELECT
         id,
         prompt_id,
         version_number,
@@ -31,9 +57,9 @@ export async function POST(
         content,
         change_description,
         created_at
-      FROM prompt_versions 
+      FROM prompt_versions
       WHERE id = ? AND prompt_id = ?
-    `).get(versionId, id);
+    `).get(versionId, id) as VersionRow | undefined;
 
     if (!targetVersion) {
       return NextResponse.json(
@@ -44,12 +70,12 @@ export async function POST(
 
     // 获取当前提示词信息
     const currentPrompt = db.prepare(`
-      SELECT 
+      SELECT
         id, title, content, description, category_id, rating, is_favorite,
         version, instructions, notes, variables
-      FROM prompts 
+      FROM prompts
       WHERE id = ?
-    `).get(id);
+    `).get(id) as PromptRow | undefined;
 
     if (!currentPrompt) {
       return NextResponse.json(
@@ -62,14 +88,14 @@ export async function POST(
     const transaction = db.transaction(() => {
       // 1. 删除目标版本之后的所有版本
       db.prepare(`
-        DELETE FROM prompt_versions 
+        DELETE FROM prompt_versions
         WHERE prompt_id = ? AND version_number > ?
       `).run(id, targetVersion.version_number);
 
       // 2. 更新主提示词记录为目标版本的内容
       db.prepare(`
-        UPDATE prompts 
-        SET 
+        UPDATE prompts
+        SET
           title = ?,
           content = ?,
           version = ?,
@@ -88,13 +114,13 @@ export async function POST(
 
     // 获取更新后的提示词
     const updatedPrompt = db.prepare(`
-      SELECT 
+      SELECT
         p.*,
         c.name as category_name
       FROM prompts p
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE p.id = ?
-    `).get(id);
+    `).get(id) as any;
 
     // 解析variables
     if (updatedPrompt && updatedPrompt.variables) {
@@ -117,4 +143,4 @@ export async function POST(
       { status: 500 }
     );
   }
-} 
+}

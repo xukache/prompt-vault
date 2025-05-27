@@ -39,11 +39,11 @@ export function VariableSystem({ variables, onChange, content }: VariableSystemP
     const regex = /\{\{\s*([^}]+)\s*\}\}/g;
     const matches = new Set<string>();
     let match;
-    
+
     while ((match = regex.exec(content)) !== null) {
       matches.add(match[1].trim());
     }
-    
+
     return Array.from(matches);
   }, [content]);
 
@@ -85,7 +85,7 @@ export function VariableSystem({ variables, onChange, content }: VariableSystemP
   };
 
   const handleUpdateVariable = (id: string, updates: Partial<Variable>) => {
-    const updatedVariables = variables.map(v => 
+    const updatedVariables = variables.map(v =>
       v.id === id ? { ...v, ...updates } : v
     );
     onChange(updatedVariables);
@@ -109,14 +109,14 @@ export function VariableSystem({ variables, onChange, content }: VariableSystemP
     onChange([...variables, variable]);
   };
 
-  const VariableForm = ({ 
-    variable, 
-    onSave, 
-    onCancel 
-  }: { 
-    variable: Partial<Variable>; 
-    onSave: (variable: Partial<Variable>) => void; 
-    onCancel: () => void; 
+  const VariableForm = ({
+    variable,
+    onSave,
+    onCancel
+  }: {
+    variable: Partial<Variable>;
+    onSave: (variable: Partial<Variable>) => void;
+    onCancel: () => void;
   }) => {
     const [formData, setFormData] = useState(variable);
 
@@ -145,7 +145,7 @@ export function VariableSystem({ variables, onChange, content }: VariableSystemP
               placeholder="例如: 用户名"
             />
           </div>
-          
+
           <div className="space-y-2">
             <label className="text-sm font-medium">类型</label>
             <select
@@ -276,7 +276,7 @@ export function VariableSystem({ variables, onChange, content }: VariableSystemP
             <div className="text-center py-8 text-muted-foreground">
               <Edit3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>还没有定义任何变量</p>
-              <p className="text-sm">在内容中使用 {{变量名}} 格式，或点击上方按钮添加变量</p>
+              <p className="text-sm">在内容中使用 {'{{变量名}}'} 格式，或点击上方按钮添加变量</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -361,7 +361,7 @@ export function VariableSystem({ variables, onChange, content }: VariableSystemP
             <div className="text-sm text-blue-800 dark:text-blue-200">
               <p className="font-medium mb-1">变量系统使用说明</p>
               <ul className="space-y-1 text-blue-700 dark:text-blue-300">
-                <li>• 在内容中使用 <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">{{变量名}}</code> 格式引用变量</li>
+                <li>• 在内容中使用 <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">{'{{变量名}}'}</code> 格式引用变量</li>
                 <li>• 系统会自动检测内容中的变量并提示定义</li>
                 <li>• 支持文本、数字、多行文本和选择项四种类型</li>
                 <li>• 可以设置默认值和描述，方便使用时理解</li>
@@ -373,4 +373,4 @@ export function VariableSystem({ variables, onChange, content }: VariableSystemP
       </Card>
     </div>
   );
-} 
+}

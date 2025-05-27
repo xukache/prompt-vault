@@ -3,6 +3,16 @@ import { getDbConnection } from "@/lib/db/sqlite";
 import { requireAuth } from "@/lib/auth/server-cookies";
 import { v4 as uuidv4 } from "uuid";
 
+interface PromptRow {
+  id: string;
+  is_shared: number;
+  like_count: number;
+}
+
+interface LikeRow {
+  id: string;
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -15,10 +25,10 @@ export async function POST(
 
     // 检查提示词是否存在且已共享
     const prompt = db.prepare(`
-      SELECT id, is_shared, like_count 
-      FROM prompts 
+      SELECT id, is_shared, like_count
+      FROM prompts
       WHERE id = ? AND is_shared = 1
-    `).get(promptId);
+    `).get(promptId) as PromptRow | undefined;
 
     if (!prompt) {
       return NextResponse.json(
@@ -29,9 +39,9 @@ export async function POST(
 
     // 检查用户是否已经点赞
     const existingLike = db.prepare(`
-      SELECT id FROM prompt_likes 
+      SELECT id FROM prompt_likes
       WHERE prompt_id = ? AND user_id = ?
-    `).get(promptId, userId);
+    `).get(promptId, userId) as LikeRow | undefined;
 
     let isLiked: boolean;
     let newLikeCount: number;
@@ -39,7 +49,7 @@ export async function POST(
     if (existingLike) {
       // 取消点赞
       db.prepare(`DELETE FROM prompt_likes WHERE id = ?`).run(existingLike.id);
-      newLikeCount = Math.max(0, (prompt as { like_count: number }).like_count - 1);
+      newLikeCount = Math.max(0, prompt.like_count - 1);
       isLiked = false;
     } else {
       // 添加点赞
@@ -48,14 +58,14 @@ export async function POST(
         INSERT INTO prompt_likes (id, prompt_id, user_id)
         VALUES (?, ?, ?)
       `).run(likeId, promptId, userId);
-      newLikeCount = (prompt as { like_count: number }).like_count + 1;
+      newLikeCount = prompt.like_count + 1;
       isLiked = true;
     }
 
     // 更新提示词的点赞数
     db.prepare(`
-      UPDATE prompts 
-      SET like_count = ? 
+      UPDATE prompts
+      SET like_count = ?
       WHERE id = ?
     `).run(newLikeCount, promptId);
 
@@ -70,4 +80,4 @@ export async function POST(
       { status: 500 }
     );
   }
-} 
+}

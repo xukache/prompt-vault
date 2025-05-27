@@ -106,7 +106,7 @@ async function addSharedPrompts() {
     // 插入共享提示词
     const insertPrompt = db.prepare(`
       INSERT OR REPLACE INTO prompts (
-        id, title, content, description, category_id, user_id, rating, 
+        id, title, content, description, category_id, user_id, rating,
         like_count, share_count, is_shared, shared_at, share_description,
         created_at, updated_at, version, is_favorite
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
@@ -142,15 +142,15 @@ async function addSharedPrompts() {
     for (const association of tagAssociations) {
       for (const tagName of association.tag_names) {
         // 确保标签存在
-        const existingTag = db.prepare('SELECT id FROM tags WHERE name = ? AND user_id = ?').get(tagName, association.prompt_id.startsWith('shared-1') ? '1' : '2');
-        
-        let tagId;
+        const existingTag = db.prepare('SELECT id FROM tags WHERE name = ? AND user_id = ?').get(tagName, association.prompt_id.startsWith('shared-1') ? '1' : '2') as { id: string } | undefined;
+
+        let tagId: string;
         if (existingTag) {
           tagId = existingTag.id;
         } else {
           const insertTag = db.prepare('INSERT INTO tags (name, user_id, created_at) VALUES (?, ?, ?)');
           const result = insertTag.run(tagName, association.prompt_id.startsWith('shared-1') ? '1' : '2', new Date().toISOString());
-          tagId = result.lastInsertRowid;
+          tagId = String(result.lastInsertRowid);
         }
 
         // 添加标签关联
@@ -160,11 +160,11 @@ async function addSharedPrompts() {
 
     console.log('✅ 共享提示词测试数据添加成功！');
     console.log(`添加了 ${sharedPrompts.length} 个共享提示词`);
-    
+
   } catch (error) {
     console.error('❌ 添加共享提示词失败:', error);
   }
 }
 
 // 运行脚本
-addSharedPrompts(); 
+addSharedPrompts();

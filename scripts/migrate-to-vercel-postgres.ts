@@ -3,13 +3,55 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
+interface UserRow {
+  username: string;
+  email: string;
+  display_name: string;
+  bio: string;
+  avatar_url: string;
+  role: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface CategoryRow {
+  name: string;
+  color: string;
+  parent_id: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface TagRow {
+  name: string;
+  color: string;
+  user_id: string;
+  created_at: string;
+}
+
+interface PromptRow {
+  title: string;
+  content: string;
+  description: string;
+  category_id: string;
+  user_id: string;
+  is_favorite: number;
+  rating: number;
+  is_shared: number;
+  share_count: number;
+  like_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
 async function migrateToVercelPostgres() {
   try {
     console.log('开始迁移数据到Vercel Postgres...');
 
     // 1. 创建表结构
     console.log('创建表结构...');
-    
+
     // 用户表
     await sql`
       CREATE TABLE IF NOT EXISTS users (
@@ -139,11 +181,11 @@ async function migrateToVercelPostgres() {
     const sqliteDbPath = path.join(process.cwd(), 'data', 'prompts.db');
     if (fs.existsSync(sqliteDbPath)) {
       console.log('发现SQLite数据库，开始迁移数据...');
-      
+
       const db = new Database(sqliteDbPath);
-      
+
       // 迁移用户数据
-      const users = db.prepare('SELECT * FROM users').all();
+      const users = db.prepare('SELECT * FROM users').all() as UserRow[];
       for (const user of users) {
         await sql`
           INSERT INTO users (username, email, display_name, bio, avatar_url, role, created_at, updated_at)
@@ -154,7 +196,7 @@ async function migrateToVercelPostgres() {
       console.log(`迁移了 ${users.length} 个用户`);
 
       // 迁移分类数据
-      const categories = db.prepare('SELECT * FROM categories').all();
+      const categories = db.prepare('SELECT * FROM categories').all() as CategoryRow[];
       for (const category of categories) {
         await sql`
           INSERT INTO categories (name, color, parent_id, user_id, created_at, updated_at)
@@ -164,7 +206,7 @@ async function migrateToVercelPostgres() {
       console.log(`迁移了 ${categories.length} 个分类`);
 
       // 迁移标签数据
-      const tags = db.prepare('SELECT * FROM tags').all();
+      const tags = db.prepare('SELECT * FROM tags').all() as TagRow[];
       for (const tag of tags) {
         await sql`
           INSERT INTO tags (name, color, user_id, created_at)
@@ -174,7 +216,7 @@ async function migrateToVercelPostgres() {
       console.log(`迁移了 ${tags.length} 个标签`);
 
       // 迁移提示词数据
-      const prompts = db.prepare('SELECT * FROM prompts').all();
+      const prompts = db.prepare('SELECT * FROM prompts').all() as PromptRow[];
       for (const prompt of prompts) {
         await sql`
           INSERT INTO prompts (title, content, description, category_id, user_id, is_favorite, rating, is_shared, share_count, like_count, created_at, updated_at)
@@ -186,7 +228,7 @@ async function migrateToVercelPostgres() {
       db.close();
     } else {
       console.log('未发现SQLite数据库，创建初始数据...');
-      
+
       // 创建默认管理员用户
       await sql`
         INSERT INTO users (username, email, display_name, bio, role)
@@ -197,7 +239,7 @@ async function migrateToVercelPostgres() {
       // 创建默认分类
       await sql`
         INSERT INTO categories (name, color, user_id)
-        VALUES 
+        VALUES
           ('通用提示词', '#3B82F6', 1),
           ('编程助手', '#10B981', 1),
           ('写作助手', '#F59E0B', 1),
@@ -209,7 +251,7 @@ async function migrateToVercelPostgres() {
     }
 
     console.log('数据迁移完成！');
-    
+
   } catch (error) {
     console.error('迁移失败:', error);
     throw error;
@@ -229,4 +271,4 @@ if (require.main === module) {
     });
 }
 
-export default migrateToVercelPostgres; 
+export default migrateToVercelPostgres;

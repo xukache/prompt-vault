@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import Database from 'better-sqlite3';
 import path from 'path';
 
+interface CategoryRow {
+  id: string;
+}
+
 const dbPath = path.join(process.cwd(), 'data', 'prompts.db');
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    
+
     if (!file) {
       return NextResponse.json(
         { error: '请选择要导入的文件' },
@@ -33,7 +37,7 @@ export async function POST(request: NextRequest) {
       // 简单的CSV解析（仅支持提示词导入）
       const lines = fileContent.split('\n');
       const headers = lines[0].split(',');
-      
+
       if (!headers.includes('标题') || !headers.includes('内容')) {
         return NextResponse.json(
           { error: 'CSV文件格式错误，缺少必要的列' },
@@ -44,11 +48,11 @@ export async function POST(request: NextRequest) {
       const prompts = lines.slice(1).filter(line => line.trim()).map(line => {
         const values = parseCSVLine(line);
         const prompt: any = {};
-        
+
         headers.forEach((header, index) => {
           const cleanHeader = header.trim().replace(/"/g, '');
           const cleanValue = values[index]?.trim().replace(/^"|"$/g, '') || '';
-          
+
           switch (cleanHeader) {
             case '标题':
               prompt.title = cleanValue;
@@ -64,7 +68,7 @@ export async function POST(request: NextRequest) {
               break;
           }
         });
-        
+
         return prompt;
       }).filter(prompt => prompt.title && prompt.content);
 
@@ -137,7 +141,7 @@ export async function POST(request: NextRequest) {
             // 获取分类ID
             let categoryId = null;
             if (prompt.category_name) {
-              const category = getCategoryId.get(prompt.category_name);
+              const category = getCategoryId.get(prompt.category_name) as CategoryRow | undefined;
               categoryId = category?.id || null;
             }
 
@@ -187,7 +191,7 @@ export async function POST(request: NextRequest) {
       }
 
       db.exec('COMMIT');
-      
+
       return NextResponse.json({
         success: true,
         imported: importedCount,
@@ -215,10 +219,10 @@ function parseCSVLine(line: string): string[] {
   const result: string[] = [];
   let current = '';
   let inQuotes = false;
-  
+
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-    
+
     if (char === '"') {
       if (inQuotes && line[i + 1] === '"') {
         // 转义的引号
@@ -236,7 +240,7 @@ function parseCSVLine(line: string): string[] {
       current += char;
     }
   }
-  
+
   result.push(current);
   return result;
-} 
+}

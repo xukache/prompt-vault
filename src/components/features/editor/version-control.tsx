@@ -10,6 +10,39 @@ import { ClientTime } from '@/components/ui/client-time';
 import { useToast } from '@/components/ui/toast';
 import { PromptVersion } from '@/types';
 
+// 简单的文本差异比较函数
+interface DiffLine {
+  type: 'added' | 'removed' | 'equal';
+  content: string;
+}
+
+function getDiff(text1: string, text2: string): DiffLine[] {
+  const lines1 = text1.split('\n');
+  const lines2 = text2.split('\n');
+  const result: DiffLine[] = [];
+
+  // 简单的逐行比较
+  const maxLines = Math.max(lines1.length, lines2.length);
+
+  for (let i = 0; i < maxLines; i++) {
+    const line1 = lines1[i];
+    const line2 = lines2[i];
+
+    if (line1 === undefined) {
+      result.push({ type: 'added', content: line2 });
+    } else if (line2 === undefined) {
+      result.push({ type: 'removed', content: line1 });
+    } else if (line1 === line2) {
+      result.push({ type: 'equal', content: line1 });
+    } else {
+      result.push({ type: 'removed', content: line1 });
+      result.push({ type: 'added', content: line2 });
+    }
+  }
+
+  return result;
+}
+
 interface VersionControlProps {
   promptId: string;
   currentContent: string;
@@ -42,11 +75,11 @@ const VersionControl: React.FC<VersionControlProps> = ({
 
   const fetchVersions = async () => {
     if (!promptId) return;
-    
+
     try {
       setLoading(true);
       const response = await fetch(`/api/prompts/${promptId}/versions`);
-      
+
       if (!response.ok) {
         throw new Error('获取版本历史失败');
       }
@@ -97,7 +130,7 @@ const VersionControl: React.FC<VersionControlProps> = ({
       setVersions(prev => [newVersion, ...prev]);
       setNewVersionTitle('');
       setChangeDescription('');
-      
+
       showToast({
         message: '版本保存成功',
         type: 'success'
@@ -196,7 +229,7 @@ const VersionControl: React.FC<VersionControlProps> = ({
             共 {versions.length} 个版本
           </Badge>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           {selectedVersions.length === 2 && (
             <Button
@@ -208,7 +241,7 @@ const VersionControl: React.FC<VersionControlProps> = ({
               {showCompare ? '退出对比' : '对比版本'}
             </Button>
           )}
-          
+
           <Button
             onClick={() => {
               setNewVersionTitle('');
@@ -229,7 +262,7 @@ const VersionControl: React.FC<VersionControlProps> = ({
           <CardHeader>
             <CardTitle>版本对比</CardTitle>
             <p className="text-sm text-muted-foreground">
-              对比版本 {versions.find(v => v.id === selectedVersions[0])?.title} 
+              对比版本 {versions.find(v => v.id === selectedVersions[0])?.title}
               和版本 {versions.find(v => v.id === selectedVersions[1])?.title}
             </p>
           </CardHeader>
@@ -237,11 +270,11 @@ const VersionControl: React.FC<VersionControlProps> = ({
             {(() => {
               const version1 = versions.find(v => v.id === selectedVersions[0]);
               const version2 = versions.find(v => v.id === selectedVersions[1]);
-              
+
               if (!version1 || !version2) return null;
-              
+
               const diff = getDiff(version1.content, version2.content);
-              
+
               return (
                 <div className="space-y-4">
                   {/* 标题对比 */}
@@ -258,7 +291,7 @@ const VersionControl: React.FC<VersionControlProps> = ({
                       </div>
                     </div>
                   )}
-                  
+
                   {/* 内容对比 */}
                   <div className="space-y-2">
                     <h4 className="font-medium">内容变更</h4>
@@ -334,7 +367,7 @@ const VersionControl: React.FC<VersionControlProps> = ({
                         disabled={!selectedVersions.includes(version.id) && selectedVersions.length >= 2}
                         className="w-4 h-4 text-primary-600 rounded"
                       />
-                      
+
                       <div>
                         <div className="flex items-center space-x-2">
                           <Badge variant={index === 0 ? "default" : "outline"}>
@@ -355,7 +388,7 @@ const VersionControl: React.FC<VersionControlProps> = ({
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       <Button
                         size="sm"
@@ -367,7 +400,7 @@ const VersionControl: React.FC<VersionControlProps> = ({
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      
+
                       {index !== 0 && (
                         <Button
                           size="sm"
@@ -413,4 +446,4 @@ const VersionControl: React.FC<VersionControlProps> = ({
   );
 };
 
-export default VersionControl; 
+export default VersionControl;

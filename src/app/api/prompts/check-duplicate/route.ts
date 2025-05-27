@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDbConnection } from '@/lib/db/sqlite';
 import { requireAuth } from '@/lib/auth/server-cookies';
 
+interface PromptRow {
+  id: string;
+  title: string;
+  content: string;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const userId = await requireAuth();
@@ -20,12 +26,12 @@ export async function POST(request: NextRequest) {
 
     // 检查是否存在相同标题或相同内容的提示词
     const baseTitle = title.replace(' (来自广场)', ''); // 去掉后缀的基础标题
-    
+
     const existingPrompt = db.prepare(`
       SELECT id, title, content
       FROM prompts
       WHERE user_id = ? AND (
-        title = ? OR 
+        title = ? OR
         title = ? OR
         content = ?
       )
@@ -34,7 +40,7 @@ export async function POST(request: NextRequest) {
       title,           // 检查完整标题
       baseTitle,       // 检查去掉后缀的标题
       content          // 检查相同内容
-    );
+    ) as PromptRow | undefined;
 
     if (existingPrompt) {
       console.log('发现重复提示词:', existingPrompt);
@@ -57,4 +63,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

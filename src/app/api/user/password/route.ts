@@ -3,6 +3,10 @@ import { getUserInfoServer } from '@/lib/auth/server-cookies';
 import fs from 'fs/promises';
 import path from 'path';
 
+interface User {
+  id: string;
+}
+
 const usersDataPath = path.join(process.cwd(), 'data', 'users.json');
 const authDataPath = path.join(process.cwd(), 'data', 'auth.json');
 
@@ -24,7 +28,7 @@ async function initAuthData() {
         password: 'user123',
       }
     };
-    
+
     await fs.mkdir(path.dirname(authDataPath), { recursive: true });
     await fs.writeFile(authDataPath, JSON.stringify(defaultAuth, null, 2));
   }
@@ -33,7 +37,7 @@ async function initAuthData() {
 // 更新密码
 export async function PUT(request: NextRequest) {
   try {
-    const user = await getUserInfoServer();
+    const user = await getUserInfoServer<User>();
     if (!user) {
       return NextResponse.json({ error: '未登录' }, { status: 401 });
     }
@@ -50,7 +54,7 @@ export async function PUT(request: NextRequest) {
 
     await initAuthData();
     const authData = JSON.parse(await fs.readFile(authDataPath, 'utf-8'));
-    
+
     if (!authData[user.id]) {
       return NextResponse.json({ error: '用户不存在' }, { status: 404 });
     }
@@ -66,12 +70,12 @@ export async function PUT(request: NextRequest) {
 
     await fs.writeFile(authDataPath, JSON.stringify(authData, null, 2));
 
-    return NextResponse.json({ 
-      success: true, 
-      message: '密码更新成功' 
+    return NextResponse.json({
+      success: true,
+      message: '密码更新成功'
     });
   } catch (error) {
     console.error('更新密码失败:', error);
     return NextResponse.json({ error: '更新密码失败' }, { status: 500 });
   }
-} 
+}

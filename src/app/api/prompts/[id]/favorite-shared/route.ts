@@ -3,6 +3,15 @@ import { getDbConnection } from "@/lib/db/sqlite";
 import { requireAuth } from "@/lib/auth/server-cookies";
 import { v4 as uuidv4 } from "uuid";
 
+interface PromptRow {
+  id: string;
+  is_shared: number;
+}
+
+interface FavoriteRow {
+  id: string;
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -15,10 +24,10 @@ export async function POST(
 
     // 检查提示词是否存在且已共享
     const prompt = db.prepare(`
-      SELECT id, is_shared 
-      FROM prompts 
+      SELECT id, is_shared
+      FROM prompts
       WHERE id = ? AND is_shared = 1
-    `).get(promptId);
+    `).get(promptId) as PromptRow | undefined;
 
     if (!prompt) {
       return NextResponse.json(
@@ -29,9 +38,9 @@ export async function POST(
 
     // 检查用户是否已经收藏
     const existingFavorite = db.prepare(`
-      SELECT id FROM shared_prompt_favorites 
+      SELECT id FROM shared_prompt_favorites
       WHERE prompt_id = ? AND user_id = ?
-    `).get(promptId, userId);
+    `).get(promptId, userId) as FavoriteRow | undefined;
 
     let isFavorited: boolean;
 
@@ -59,4 +68,4 @@ export async function POST(
       { status: 500 }
     );
   }
-} 
+}
