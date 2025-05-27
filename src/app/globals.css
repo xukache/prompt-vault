@@ -4,18 +4,139 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111827;
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --primary: #3c559f;
+  --primary-foreground: #ffffff;
+  --secondary: #bc7dac;
+  --secondary-foreground: #ffffff;
+  --accent: #576fb7;
+  --accent-foreground: #ffffff;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #7f90c2;
+  --radius: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.dark {
+  --background: #121926;
+  --foreground: #e5e7eb;
+  --card: #1a2233;
+  --card-foreground: #f9fafb;
+  --primary: #576fb7;
+  --primary-foreground: #ffffff;
+  --secondary: #bc7dac;
+  --secondary-foreground: #ffffff;
+  --accent: #7f90c2;
+  --accent-foreground: #ffffff;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --border: #334155;
+  --input: #334155;
+  --ring: #576fb7;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent;
+  }
+  
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary-500 to-primary-700;
+  }
+  
+  .gradient-secondary {
+    @apply bg-gradient-to-r from-secondary-500 to-secondary-700;
+  }
+
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .line-clamp-4 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+  }
+}
+
+/* 主题切换开关 */
+.theme-toggle {
+  width: 40px;
+  height: 20px;
+  background-color: #e2e8f0;
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.theme-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.dark .theme-toggle {
+  background-color: #3c559f;
+}
+
+.dark .theme-toggle::after {
+  transform: translateX(20px);
+}
+
+/* 特性卡片 */
+.feature-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 示例卡片 */
+.example-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+
+.example-card:hover {
+  transform: translateY(-5px);
 }

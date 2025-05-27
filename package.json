@@ -1,27 +1,60 @@
 {
   "name": "prompt-vault",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "init-db": "ts-node --project tsconfig.scripts.json scripts/init-db.ts",
+    "verify-db": "ts-node --project tsconfig.scripts.json scripts/verify-db.ts",
+    "test-api": "ts-node --project tsconfig.scripts.json scripts/test-api.ts",
+    "seed-data": "ts-node --project tsconfig.scripts.json scripts/seed-data.ts",
+    "seed-knowledge": "node scripts/seed-knowledge-data.js"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@orama/orama": "^3.1.7",
+    "@orama/plugin-embeddings": "^3.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/js-cookie": "^3.0.6",
+    "@types/uuid": "^10.0.0",
+    "@uiw/react-markdown-preview": "^5.1.4",
+    "@uiw/react-md-editor": "^4.0.7",
+    "@vercel/blob": "^1.1.1",
+    "@vercel/kv": "^3.0.0",
+    "@vercel/postgres": "^0.10.0",
+    "better-sqlite3": "^11.10.0",
+    "bootstrap-icons": "^1.13.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "js-cookie": "^3.0.5",
+    "lucide-react": "^0.511.0",
+    "next": "15.1.8",
     "react": "^19.0.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.0.0",
-    "next": "15.1.8"
+    "react-hot-toast": "^2.5.2",
+    "tailwind-merge": "^3.3.0",
+    "uuid": "^11.1.0",
+    "xlsx": "^0.18.5",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/line-clamp": "^0.4.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
     "eslint": "^9",
     "eslint-config-next": "15.1.8",
-    "@eslint/eslintrc": "^3"
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5"
   }
 }

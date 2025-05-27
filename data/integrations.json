@@ -1,0 +1,5 @@
+{
+  "apiBaseUrl": "https://api.openai.com/v1",
+  "apiKey": "",
+  "apiModel": "gpt-3.5-turbo"
+}

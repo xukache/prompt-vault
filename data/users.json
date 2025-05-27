@@ -1,0 +1,24 @@
+{
+  "1": {
+    "id": "1",
+    "email": "admin@promptvault.com",
+    "displayName": "系统管理员",
+    "username": "admin",
+    "bio": "系统管理员，负责平台维护和用户管理。热爱AI技术和提示词工程，致力于为用户提供最佳的提示词管理体验。",
+    "avatar": "",
+    "role": "admin",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2025-05-26T10:37:20.263Z"
+  },
+  "2": {
+    "id": "2",
+    "email": "user@promptvault.com",
+    "displayName": "普通用户",
+    "username": "user",
+    "bio": "热爱AI和提示词工程的用户，喜欢探索各种创新的提示词技巧和最佳实践。",
+    "avatar": "",
+    "role": "user",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2025-05-26T10:37:20.263Z"
+  }
+}
