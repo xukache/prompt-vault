@@ -5,10 +5,9 @@
   "framework": "nextjs",
   "functions": {
     "src/app/api/**/*.ts": {
-      "maxDuration": 30
+      "maxDuration": 10
     }
   },
-  "regions": ["hkg1", "sin1"],
   "git": {
     "deploymentEnabled": {
       "main": true,
